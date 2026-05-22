@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新聞英文互動學習面板</title>
+  <style>
+    :root {
+      --primary: #0052cc;
+      --green: #00875a;
+      --bg: #f4f5f7;
+      --card: #ffffff;
+      --text: #172b4d;
+      --muted: #5e6c84;
+      --line: #dfe1e6;
+      --purple: #6554c0;
+      --orange: #ff8b00;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+    }
+    button, input, select, textarea { font: inherit; }
+    .container { max-width: 980px; margin: 0 auto; }
+    .hero-banner {
+      background-color: #fff9b8;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,.06);
+      margin-bottom: 20px;
+      overflow: hidden;
+      display: block;
+    }
+    .hero-banner img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    h1 {
+      border-bottom: 4px solid var(--primary);
+      color: #091e42;
+      font-size: 2.2rem;
+      margin: 0 0 28px;
+      padding-bottom: 10px;
+      text-align: center;
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,.06);
+      margin-bottom: 22px;
+      padding: 18px;
+    }
+    .panel h2 { color: #091e42; font-size: 1.25rem; margin: 0 0 14px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    label { color: #253858; font-size: .92rem; font-weight: 700; }
+    input, select, textarea {
+      background: #fff;
+      border: 1px solid #c1c7d0;
+      border-radius: 6px;
+      color: var(--text);
+      padding: 10px 12px;
+      width: 100%;
+    }
+    textarea { min-height: 86px; resize: vertical; }
+    .toolbar, .accent-control, .view-toolbar {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .action-btn, .accent-btn, .view-btn {
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      padding: 9px 12px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(0,0,0,.08);
+      transition: opacity .2s, transform .2s, background-color .2s;
+    }
+    .action-btn {
+      background: var(--primary);
+      border: none;
+      color: #fff;
+    }
+    .action-btn.secondary { background: var(--green); }
+    .action-btn.warning { background: #42526e; }
+    .accent-btn, .view-btn {
+      background: #fff;
+      border: 1px solid #c1c7d0;
+      color: #253858;
+    }
+    .accent-btn.active, .view-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .action-btn:hover, .accent-btn:hover, .view-btn:hover { opacity: .9; }
+    .small-note, .cloud-status, .status { color: var(--muted); font-size: .92rem; margin: 0; }
+    .status { min-height: 22px; }
+    .cloud-status { margin-top: 10px; }
+    .view-toolbar { margin: 0 0 18px; }
+    .content-layout {
+      align-items: start;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 240px minmax(0, 1fr);
+    }
+    .category-index {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,.06);
+      padding: 14px;
+      position: sticky;
+      top: 14px;
+    }
+    .category-index h2 { color: #091e42; font-size: 1.05rem; margin: 0 0 10px; }
+    .category-list { display: grid; gap: 6px; }
+    .category-link {
+      align-items: center;
+      border-radius: 6px;
+      color: #253858;
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      padding: 8px 10px;
+      text-decoration: none;
+    }
+    .category-link:hover, .category-link.active { background: #f0f2f5; }
+    .category-count { color: #6b778c; flex-shrink: 0; font-size: .82rem; }
+    .section-title {
+      border-radius: 6px;
+      color: #fff;
+      font-size: 1.35rem;
+      margin: 0 0 16px;
+      padding: 10px 15px;
+    }
+    .title-housing { background: #0052cc; }
+    .title-finance { background: #00875a; }
+    .title-politics { background: #6554c0; }
+    .title-society { background: #00a3bf; }
+    .title-tech { background: #403294; }
+    .title-healthenv { background: #36b37e; }
+    .title-entertainment { background: #ff7452; }
+    .title-travel { background: #0065ff; }
+    .title-food { background: #ff8b00; }
+    .title-phrases { background: #ff5630; }
+    .title-custom { background: #42526e; }
+    .card {
+      background: var(--card);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,.08);
+      margin-bottom: 15px;
+      padding: 20px;
+    }
+    .word-header {
+      align-items: center;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .vocab { color: #091e42; font-size: 1.2rem; font-weight: 700; }
+    .card-date { color: #6b778c; font-size: .82rem; margin: 0 0 10px; }
+    .card-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .play-btn, .delete-btn, .play-sentence-btn {
+      background: #f0f2f5;
+      border: none;
+      cursor: pointer;
+    }
+    .play-btn, .delete-btn {
+      align-items: center;
+      border-radius: 50%;
+      display: flex;
+      font-size: 1.1rem;
+      height: 40px;
+      justify-content: center;
+      width: 40px;
+    }
+    .delete-btn { color: #de350b; }
+    .definition {
+      background: #fafbfc;
+      border-left: 3px solid var(--line);
+      color: var(--muted);
+      font-size: .95rem;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      white-space: pre-line;
+    }
+    .example-block {
+      background: #f7f9fa;
+      border-radius: 6px;
+      padding: 12px;
+      position: relative;
+    }
+    .example-en {
+      color: #253858;
+      font-size: 1.05rem;
+      font-style: italic;
+      margin-bottom: 5px;
+      padding-right: 40px;
+    }
+    .example-zh { color: #6b778c; font-size: .95rem; white-space: pre-line; }
+    .play-sentence-btn {
+      background: transparent;
+      font-size: 1.1rem;
+      opacity: .65;
+      position: absolute;
+      right: 12px;
+      top: 12px;
+    }
+    .empty-state {
+      background: #fff;
+      border: 1px dashed #c1c7d0;
+      border-radius: 8px;
+      color: #5e6c84;
+      padding: 22px;
+      text-align: center;
+    }
+    /* ===== 統計列 ===== */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    .stat-pill {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,.06);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat-pill .stat-label { color: var(--muted); font-size: .82rem; font-weight: 600; }
+    .stat-pill .stat-value { color: #091e42; font-size: 1.6rem; font-weight: 800; line-height: 1; }
+    .stat-pill.today .stat-value { color: var(--primary); }
+    .stat-pill.week .stat-value { color: var(--purple); }
+    .stat-pill.memorized .stat-value { color: var(--green); }
+    .stat-pill.review .stat-value { color: var(--orange); }
+
+    /* ===== 搜尋與篩選 ===== */
+    .search-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .search-input {
+      flex: 1 1 280px;
+      min-width: 200px;
+    }
+    .search-clear {
+      background: #fff;
+      border: 1px solid #c1c7d0;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #5e6c84;
+      padding: 9px 14px;
+    }
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .filter-chip {
+      background: #fff;
+      border: 1px solid #c1c7d0;
+      border-radius: 999px;
+      color: #253858;
+      cursor: pointer;
+      font-size: .88rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      transition: all .15s;
+    }
+    .filter-chip:hover { border-color: #5e6c84; }
+    .filter-chip.active {
+      background: var(--text);
+      border-color: var(--text);
+      color: #fff;
+    }
+    .filter-chip.active.memorized { background: var(--green); border-color: var(--green); }
+    .filter-chip.active.review { background: var(--orange); border-color: var(--orange); }
+
+    /* ===== 學習模式按鈕 ===== */
+    .mode-btn {
+      background: linear-gradient(135deg, #6554c0, #0052cc);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      padding: 9px 14px;
+      transition: opacity .2s, transform .2s;
+    }
+    .mode-btn:hover { opacity: .9; }
+    .mode-btn.quiz { background: linear-gradient(135deg, #ff5630, #ff8b00); }
+
+    /* ===== 卡片狀態標記 ===== */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      font-size: .76rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .status-pill.memorized { background: #e3fcef; color: #006644; }
+    .status-pill.review { background: #fff4e5; color: #974f00; }
+    .card-mark-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .mark-btn {
+      background: #fff;
+      border: 1px solid #c1c7d0;
+      border-radius: 6px;
+      color: #5e6c84;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      transition: all .15s;
+    }
+    .mark-btn:hover { background: #f4f5f7; border-color: #5e6c84; }
+    .mark-btn.active.memorized {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+    }
+    .mark-btn.active.review {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #fff;
+    }
+
+    /* ===== 來源連結與圖片 ===== */
+    .card-image {
+      border-radius: 6px;
+      display: block;
+      margin: 10px 0;
+      max-height: 220px;
+      max-width: 100%;
+      object-fit: cover;
+    }
+    .card-source {
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: .85rem;
+      margin-top: 10px;
+      text-decoration: none;
+      word-break: break-all;
+    }
+    .card-source:hover { text-decoration: underline; }
+
+    /* ===== 手機浮動按鈕 ===== */
+    .fab {
+      display: none;
+      position: fixed;
+      right: 18px;
+      bottom: 22px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0052cc, #6554c0);
+      border: none;
+      box-shadow: 0 6px 18px rgba(0, 82, 204, .4);
+      color: #fff;
+      font-size: 1.9rem;
+      cursor: pointer;
+      z-index: 50;
+      transition: transform .15s;
+    }
+    .fab:active { transform: scale(.92); }
+
+    /* ===== Modal / Overlay ===== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 30, 66, .68);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop[hidden] { display: none; }
+    .modal-panel {
+      background: var(--card);
+      border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      max-width: 640px;
+      width: 100%;
+      max-height: 88vh;
+      overflow: auto;
+      padding: 24px;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #f4f5f7;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: #5e6c84;
+    }
+    .modal-title {
+      margin: 0 0 4px;
+      color: #091e42;
+      font-size: 1.3rem;
+    }
+    .modal-sub {
+      color: var(--muted);
+      font-size: .9rem;
+      margin: 0 0 18px;
+    }
+
+    /* ===== 閃卡 ===== */
+    .flashcard {
+      background: linear-gradient(135deg, #f4f5f7, #fff);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 32px 24px;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: transform .25s;
+      user-select: none;
+    }
+    .flashcard:hover { transform: translateY(-2px); }
+    .flashcard .fc-vocab {
+      color: #091e42;
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    .flashcard .fc-en {
+      color: #253858;
+      font-size: 1.1rem;
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+    .flashcard .fc-hint {
+      color: var(--muted);
+      font-size: .85rem;
+      margin-top: 14px;
+    }
+    .flashcard.flipped { background: linear-gradient(135deg, #e6effc, #fff); }
+    .flashcard .fc-back { display: none; width: 100%; }
+    .flashcard.flipped .fc-back { display: block; }
+    .flashcard .fc-definition {
+      background: #fff;
+      border-left: 3px solid var(--primary);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 1rem;
+      padding: 10px 14px;
+      margin: 14px 0;
+      text-align: left;
+      white-space: pre-line;
+    }
+    .flashcard .fc-zh {
+      color: #253858;
+      font-size: 1rem;
+    }
+    .flashcard-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .flashcard-progress {
+      color: var(--muted);
+      font-size: .9rem;
+      font-weight: 600;
+    }
+    .flashcard-nav {
+      display: flex;
+      gap: 8px;
+    }
+    .flashcard-judge {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      justify-content: center;
+    }
+    .judge-btn {
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-size: .95rem;
+      font-weight: 700;
+      padding: 10px 18px;
+      transition: opacity .2s;
+    }
+    .judge-btn:hover { opacity: .9; }
+    .judge-btn.know { background: var(--green); }
+    .judge-btn.dont { background: var(--orange); }
+
+    /* ===== 測驗 ===== */
+    .quiz-question {
+      background: #f7f9fa;
+      border-radius: 8px;
+      color: #253858;
+      font-size: 1.05rem;
+      font-style: italic;
+      line-height: 1.5;
+      padding: 16px 18px;
+      margin-bottom: 6px;
+    }
+    .quiz-blank {
+      background: #ffd8a8;
+      border-radius: 4px;
+      color: #91450a;
+      font-weight: 700;
+      font-style: normal;
+      padding: 1px 10px;
+      margin: 0 2px;
+    }
+    .quiz-zh-hint {
+      color: var(--muted);
+      font-size: .9rem;
+      margin: 6px 0 18px;
+    }
+    .quiz-choices {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .quiz-choice {
+      background: #fff;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 12px 16px;
+      text-align: left;
+      transition: all .15s;
+    }
+    .quiz-choice:hover { border-color: var(--primary); background: #f4f8ff; }
+    .quiz-choice.correct { background: #e3fcef; border-color: var(--green); color: #006644; }
+    .quiz-choice.wrong { background: #ffebe6; border-color: #de350b; color: #bf2600; }
+    .quiz-choice:disabled { cursor: default; }
+    .quiz-stats {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: 12px;
+    }
+    .quiz-feedback {
+      background: #f4f5f7;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      font-size: .92rem;
+      color: var(--text);
+    }
+    .quiz-feedback.correct { background: #e3fcef; color: #006644; }
+    .quiz-feedback.wrong { background: #ffebe6; color: #bf2600; }
+
+    @media (max-width: 720px) {
+      body { padding: 14px; padding-bottom: 100px; }
+      h1 { font-size: 1.7rem; }
+      .form-grid, .content-layout { grid-template-columns: 1fr; }
+      .category-index { position: static; }
+      .section-title { font-size: 1.15rem; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .fab { display: flex; align-items: center; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero-banner">
+      <img src="assets/header-abc.png" alt="ABC 英文學習頁首圖片與卡通人物">
+    </div>
+    <h1>新聞英文互動學習面板</h1>
+
+    <div class="stats-bar" aria-label="學習統計">
+      <div class="stat-pill today"><span class="stat-label">今天新增</span><span id="statToday" class="stat-value">0</span></div>
+      <div class="stat-pill week"><span class="stat-label">本週新增</span><span id="statWeek" class="stat-value">0</span></div>
+      <div class="stat-pill memorized"><span class="stat-label">已記住</span><span id="statMem" class="stat-value">0</span></div>
+      <div class="stat-pill review"><span class="stat-label">待複習</span><span id="statRev" class="stat-value">0</span></div>
+    </div>
+
+    <section class="panel" aria-labelledby="accent-title">
+      <h2 id="accent-title">新聞來源口音</h2>
+      <div class="accent-control" role="group" aria-label="選擇英文發音口音">
+        <button class="accent-btn" type="button" data-accent="en-AU">澳洲</button>
+        <button class="accent-btn" type="button" data-accent="en-GB">英式</button>
+        <button class="accent-btn" type="button" data-accent="en-US">美式</button>
+      </div>
+      <p class="small-note">選擇後，所有單字與例句的發音都會優先使用該口音。</p>
+    </section>
+
+    <section class="panel" aria-labelledby="sync-title">
+      <h2 id="sync-title">☁️ 雲端同步（JSONBin.io）</h2>
+      <p class="small-note" style="margin-bottom:10px">手機與電腦會自動共用同一份卡片。第一次使用請先設定。</p>
+      <details id="cloudSettings" class="cloud-settings">
+        <summary style="cursor:pointer;font-weight:700;color:#253858;padding:4px 0">⚙️ 雲端設定（首次使用必填）</summary>
+        <div style="margin-top:14px">
+          <div class="field">
+            <label for="jbMasterKey">Master Key</label>
+            <input id="jbMasterKey" type="password" placeholder="$2a$10$... 從 jsonbin.io 的 API Keys 複製" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="jbBinId">Bin ID</label>
+            <input id="jbBinId" type="text" placeholder="沒有？貼好 Master Key 後按「建立新 Bin」自動產生" autocomplete="off">
+          </div>
+          <div class="toolbar" style="margin-top:10px">
+            <button id="jbSaveBtn" class="action-btn secondary" type="button">💾 儲存設定</button>
+            <button id="jbCreateBinBtn" class="action-btn" type="button">✨ 建立新 Bin</button>
+            <button id="jbHelpBtn" class="action-btn warning" type="button">📖 使用教學</button>
+          </div>
+          <p class="small-note" style="margin-top:10px">⚠️ Master Key 只會存在你的瀏覽器（localStorage），不會傳到其他地方。換手機/電腦時要在新裝置重新貼一次。</p>
+        </div>
+      </details>
+      <div class="toolbar" style="margin-top:12px">
+        <button id="syncBtn" class="action-btn secondary" type="button">⬇️ 立即從雲端同步</button>
+        <button id="cloudTestBtn" class="action-btn" type="button">🔗 測試雲端連線</button>
+      </div>
+      <p id="cloudStatus" class="cloud-status">尚未設定雲端同步。</p>
+    </section>
+
+    <section class="panel" aria-labelledby="ai-title">
+      <h2 id="ai-title">新增句子與 AI 辨識</h2>
+      <div class="field">
+        <label for="aiInput">貼上英文句子</label>
+        <textarea id="aiInput" placeholder="例如：High rents are pricing young people out of their own neighborhoods."></textarea>
+      </div>
+      <div class="field">
+        <label for="aiEndpoint">AI 服務網址（選填）</label>
+        <input id="aiEndpoint" type="url" placeholder="例如：https://你的服務網址/analyze-sentence">
+      </div>
+      <div class="toolbar" style="margin-top:12px">
+        <button id="recognizeBtn" class="action-btn" type="button">AI 辨識並填入</button>
+        <button id="clearFormBtn" class="action-btn warning" type="button">清空欄位</button>
+        <p class="small-note">不填服務網址時會先用本機規則辨識；接上 AI 服務後可自動回填。</p>
+      </div>
+      <div id="status" class="status" role="status"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="bulk-title">
+      <h2 id="bulk-title">批次貼上自動排列</h2>
+      <div class="field">
+        <label for="bulkInput">貼上整段講義或多句詞條</label>
+        <textarea id="bulkInput" placeholder="一、 房地產與都市規劃專有名詞&#10;Median Dwelling Value (住宅價值中位數) [00:20]&#10;解釋：市場上所有房屋價格的中間值。&#10;&#10;Keep someone up at night (讓某人徹夜難眠) [00:13]&#10;意思：令人深感焦慮。&#10;例句：The worsening housing crisis just keeps me up at night."></textarea>
+      </div>
+      <div class="toolbar" style="margin-top:12px">
+        <button id="bulkImportBtn" class="action-btn secondary" type="button">批次匯入卡片</button>
+        <button id="bulkClearBtn" class="action-btn warning" type="button">清空批次內容</button>
+      </div>
+      <div id="bulkStatus" class="status" role="status"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="manual-title">
+      <h2 id="manual-title">手動新增卡片</h2>
+      <form id="addForm" class="form-grid">
+        <div class="field">
+          <label for="section">分類</label>
+          <select id="section">
+            <option value="housing">居住、房地產與城市</option>
+            <option value="finance">財經、商業與就業</option>
+            <option value="politics">政治、國際與法律</option>
+            <option value="society">社會、教育與民生</option>
+            <option value="tech">科技、AI 與網路</option>
+            <option value="healthenv">健康、環境與安全</option>
+            <option value="entertainment">娛樂、文化與影視</option>
+            <option value="travel">旅遊、交通與地方</option>
+            <option value="food">飲食、餐廳與生活風格</option>
+            <option value="phrases">道地片語與慣用語</option>
+            <option value="custom">自訂新增句子</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="vocab">重點字彙 / 片語</label>
+          <input id="vocab" type="text" placeholder="例如：Pricing out" required>
+        </div>
+        <div class="field full">
+          <label for="definition">中文解釋</label>
+          <input id="definition" type="text" placeholder="例如：用高價把某人擠出市場" required>
+        </div>
+        <div class="field full">
+          <label for="exampleEn">英文例句</label>
+          <textarea id="exampleEn" placeholder="輸入英文例句" required></textarea>
+        </div>
+        <div class="field full">
+          <label for="exampleZh">中文句意</label>
+          <textarea id="exampleZh" placeholder="輸入中文翻譯或筆記" required></textarea>
+        </div>
+        <div class="field">
+          <label for="imageUrl">圖片網址（選填）</label>
+          <input id="imageUrl" type="url" placeholder="https://example.com/image.jpg">
+        </div>
+        <div class="field">
+          <label for="sourceUrl">來源連結（選填）</label>
+          <input id="sourceUrl" type="url" placeholder="https://abc.net.au/news/...">
+        </div>
+        <div class="toolbar field full">
+          <button class="action-btn secondary" type="submit">加入學習卡片</button>
+          <button id="resetBtn" class="action-btn warning" type="button">還原預設內容</button>
+        </div>
+      </form>
+    </section>
+
+    <div class="search-row">
+      <input id="searchInput" class="search-input" type="search" placeholder="🔍 搜尋單字、解釋、例句...">
+      <button id="searchClearBtn" class="search-clear" type="button">清除</button>
+    </div>
+
+    <div class="view-toolbar" aria-label="內容檢視切換">
+      <button id="todayViewBtn" class="view-btn active" type="button">今日新增</button>
+      <button id="allViewBtn" class="view-btn" type="button">全部分類</button>
+      <button id="flashcardBtn" class="mode-btn" type="button">🃏 閃卡複習</button>
+      <button id="quizBtn" class="mode-btn quiz" type="button">🎯 測驗模式</button>
+    </div>
+
+    <div class="filter-chips" aria-label="狀態篩選">
+      <button class="filter-chip active" type="button" data-status="all">全部</button>
+      <button class="filter-chip" type="button" data-status="new">📘 未標記</button>
+      <button class="filter-chip" type="button" data-status="memorized">✓ 已記住</button>
+      <button class="filter-chip" type="button" data-status="review">↻ 待複習</button>
+    </div>
+
+    <div class="content-layout">
+      <aside class="category-index" aria-labelledby="category-index-title">
+        <h2 id="category-index-title">分類索引</h2>
+        <nav id="categoryIndex" class="category-list" aria-label="分類索引"></nav>
+      </aside>
+      <main id="cardRoot"></main>
+    </div>
+  </div>
+
+  <button id="fabBtn" class="fab" type="button" aria-label="快速新增句子">＋</button>
+
+  <div id="flashcardModal" class="modal-backdrop" hidden>
+    <div class="modal-panel">
+      <button class="modal-close" type="button" data-close="flashcard" aria-label="關閉">×</button>
+      <h3 class="modal-title">🃏 閃卡複習</h3>
+      <p class="modal-sub">點卡片翻面看答案，按下方按鈕判斷自己會不會。</p>
+      <div id="flashcardArea"></div>
+    </div>
+  </div>
+
+  <div id="quizModal" class="modal-backdrop" hidden>
+    <div class="modal-panel">
+      <button class="modal-close" type="button" data-close="quiz" aria-label="關閉">×</button>
+      <h3 class="modal-title">🎯 測驗模式</h3>
+      <p class="modal-sub">看英文例句、選出正確的單字 / 片語。</p>
+      <div id="quizArea"></div>
+    </div>
+  </div>
+
+  <div id="helpModal" class="modal-backdrop" hidden>
+    <div class="modal-panel">
+      <button class="modal-close" type="button" data-close="help" aria-label="關閉">×</button>
+      <h3 class="modal-title">📖 JSONBin 使用教學</h3>
+      <p class="modal-sub">5 分鐘設定，之後手機/電腦自動同步。</p>
+      <ol style="line-height:1.9;color:#253858;padding-left:22px">
+        <li>打開 <a href="https://jsonbin.io" target="_blank" rel="noopener" style="color:#0052cc;font-weight:700">https://jsonbin.io</a>，右上 <b>Sign Up</b> 註冊（建議用 Google 登入）。</li>
+        <li>登入後左側選單點 <b>API Keys</b>。</li>
+        <li>找到 <b>X-MASTER-KEY</b> 那一欄，點右邊複製按鈕。</li>
+        <li>回到本面板，把 Master Key 貼到上方輸入框。</li>
+        <li>按 <b>✨ 建立新 Bin</b> 按鈕 → 系統會自動建立並填入 Bin ID。</li>
+        <li>完成！之後手機/電腦只要貼上同一組 Master Key + Bin ID，就會看到同一份卡片。</li>
+      </ol>
+      <div style="background:#fff4e5;border-left:3px solid #ff8b00;border-radius:6px;padding:10px 14px;margin-top:14px;color:#974f00;font-size:.92rem">
+        <b>📱 換到手機怎麼用？</b><br>
+        手機打開同一個網址 → 展開「⚙️ 雲端設定」→ 貼上同一個 Master Key 跟 Bin ID → 按「⬇️ 立即從雲端同步」就會看到電腦的卡片。
+      </div>
+      <div style="background:#e3fcef;border-left:3px solid #00875a;border-radius:6px;padding:10px 14px;margin-top:10px;color:#006644;font-size:.92rem">
+        <b>💡 免費額度</b><br>
+        JSONBin 免費版每月 10,000 次請求，個人學習綽綽有餘。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const storageKey = "newsVocabPanelItems";
+    const endpointStorageKey = "newsVocabPanelAiEndpoint";
+    const accentStorageKey = "newsVocabPanelAccent";
+    const jbKeyStorage = "newsVocabPanelJbMasterKey";
+    const jbBinStorage = "newsVocabPanelJbBinId";
+    const jbApiBase = "https://api.jsonbin.io/v3/b";
+    const accentFallbacks = {
+      "en-AU": ["en-AU", "en-GB", "en-US"],
+      "en-GB": ["en-GB", "en-AU", "en-US"],
+      "en-US": ["en-US", "en-GB", "en-AU"]
+    };
+    const sectionAliases = {
+      crisis: "housing",
+      made: "finance",
+      economy: "finance",
+      policy: "politics",
+      law: "politics",
+      world: "politics",
+      environment: "healthenv",
+      health: "healthenv"
+    };
+    const sections = {
+      housing: { title: "🏙️ 居住、房地產與城市", className: "title-housing" },
+      finance: { title: "💰 財經、商業與就業", className: "title-finance" },
+      politics: { title: "🏛️ 政治、國際與法律", className: "title-politics" },
+      society: { title: "🏫 社會、教育與民生", className: "title-society" },
+      tech: { title: "🤖 科技、AI 與網路", className: "title-tech" },
+      healthenv: { title: "🌿 健康、環境與安全", className: "title-healthenv" },
+      entertainment: { title: "🎬 娛樂、文化與影視", className: "title-entertainment" },
+      travel: { title: "🧳 旅遊、交通與地方", className: "title-travel" },
+      food: { title: "🍽️ 飲食、餐廳與生活風格", className: "title-food" },
+      phrases: { title: "🗣️ 道地片語與慣用語", className: "title-phrases" },
+      custom: { title: "✨ 自訂新增句子", className: "title-custom" }
+    };
+    const sectionKeywords = [
+      { section: "housing", keywords: ["rental", "rent", "housing", "dwelling", "property", "zoning", "upzoning", "nimby", "downsize", "房", "租", "住宅", "土地", "都市"] },
+      { section: "finance", keywords: ["investment", "tax", "finance", "economy", "business", "shop", "manufacturer", "income", "wage", "market", "jobs", "投資", "稅", "金融", "經濟", "商業", "就業", "收入", "市場", "消費"] },
+      { section: "politics", keywords: ["policy", "government", "crime", "court", "law", "police", "foreign", "international", "政策", "政府", "犯罪", "法律", "司法", "國際", "外交"] },
+      { section: "society", keywords: ["school", "education", "family", "community", "social", "homelessness", "社會", "教育", "家庭", "民生"] },
+      { section: "tech", keywords: ["technology", "ai", "internet", "cyber", "科技", "網路", "人工智慧"] },
+      { section: "healthenv", keywords: ["health", "medical", "hospital", "safety", "climate", "environment", "energy", "醫療", "健康", "安全", "環境", "氣候", "能源"] },
+      { section: "entertainment", keywords: ["entertainment", "movie", "film", "music", "celebrity", "culture", "娛樂", "影視", "電影", "音樂", "明星", "文化"] },
+      { section: "travel", keywords: ["travel", "tourism", "flight", "airport", "hotel", "transport", "destination", "旅遊", "旅行", "觀光", "航班", "機場", "飯店", "交通", "景點"] },
+      { section: "food", keywords: ["food", "restaurant", "dining", "cafe", "coffee", "recipe", "chef", "飲食", "餐廳", "美食", "咖啡", "料理"] },
+      { section: "phrases", keywords: ["keep someone up at night", "keeps the wheels turning", "pull a dangerous lever", "catch-all", "outpace", "fall out of the market", "片語", "慣用語"] }
+    ];
+    const exactSectionOverrides = {
+      "rental crisis": "housing",
+      "pricing out": "housing",
+      "put a roof over one's head": "phrases",
+      "upfront investment": "finance",
+      "swap your shop": "finance",
+      "keeps the wheels turning": "phrases"
+    };
+    const defaultItems = [
+      { id: "rental-crisis", section: "housing", createdAt: "未記錄", vocab: "Rental Crisis", definition: "租屋危機：形容市場上嚴重缺乏長租房源、租金飆升的困境。", exampleEn: "The surging number of holiday homes has triggered a severe rental crisis in Western Australia.", exampleZh: "度假房屋數量的激增引發了西澳嚴重的租屋危機。" },
+      { id: "pricing-out", section: "housing", createdAt: "未記錄", vocab: "Pricing out", definition: "用高價把...擠出市場：價格過高使原本的群體無法負擔。", exampleEn: "High rents are pricing young people out of their own neighborhoods.", exampleZh: "高昂的租金正把年輕人擠出他們原本居住的社區。" },
+      { id: "put-a-roof", section: "phrases", createdAt: "未記錄", vocab: "Put a roof over one's head", definition: "有個容身之處 / 尋求庇護：擁有一棟可以安全居住的房子。", exampleEn: "Many workers are struggling just to put a roof over their heads.", exampleZh: "許多勞工光是為了能有個容身之處，就已經在苦苦掙扎。" },
+      { id: "upfront-investment", section: "finance", createdAt: "未記錄", vocab: "Upfront Investment", definition: "前期投入資金 / 初始購買成本：購買產品或投資時最初需要支付的費用。", exampleEn: "Although the upfront investment is higher, local products last much longer.", exampleZh: "雖然初始購買成本較高，但本地產品的壽命要長得多。" },
+      { id: "swap-your-shop", section: "finance", createdAt: "未記錄", vocab: "Swap Your Shop", definition: "改變你的消費習慣：將日常購買的一部分進口貨替換為在地產品。", exampleEn: "The 'Swap Your Shop' challenge encourages people to buy Australian-made goods.", exampleZh: "「改變消費習慣」挑戰鼓勵人們購買澳洲製造的商品。" },
+      { id: "keeps-wheels-turning", section: "phrases", createdAt: "未記錄", vocab: "Keeps the wheels turning", definition: "維持運轉 / 保持繁榮：讓經濟或系統持續運作而不中斷。", exampleEn: "Supporting local manufacturers keeps the wheels of the economy turning.", exampleZh: "支持在地製造商能讓國家經濟的齒輪持續運轉。" }
+    ];
+
+    let selectedAccent = safeLocalGet(accentStorageKey) || "en-AU";
+    let cloudSaveTimer = null;
+    let lastCloudSyncAt = 0;
+    let currentView = "today";
+    let activeCategoryId = null;
+    let searchQuery = "";
+    let statusFilter = "all";
+    let items = loadItems();
+
+    function safeLocalGet(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function safeLocalSet(key, value) {
+      try {
+        localStorage.setItem(key, value);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function loadItems() {
+      const saved = safeLocalGet(storageKey);
+      if (!saved) return migrateItems([...defaultItems]);
+      try { return migrateItems(JSON.parse(saved)); } catch { return migrateItems([...defaultItems]); }
+    }
+    function migrateItems(sourceItems) {
+      if (!Array.isArray(sourceItems)) return migrateItems([...defaultItems]);
+      return sourceItems.map(item => ({
+        status: "new",
+        imageUrl: "",
+        sourceUrl: "",
+        ...item,
+        section: item.groupTitle ? item.section || "custom" : classifyItem(item),
+        createdAt: normalizeCreatedAt(item.createdAt)
+      }));
+    }
+    function normalizeCreatedAt(value) {
+      if (!value) return "未記錄";
+      return String(value);
+    }
+    function classifyItem(item) {
+      const currentSection = item.section || "custom";
+      if (sectionAliases[currentSection]) return sectionAliases[currentSection];
+      if (sections[currentSection]) return currentSection;
+      const normalized = String(item.vocab || "").trim().toLowerCase();
+      if (exactSectionOverrides[normalized]) return exactSectionOverrides[normalized];
+      const text = [item.vocab, item.definition, item.exampleEn, item.exampleZh].join(" ").toLowerCase();
+      const match = sectionKeywords.find(rule => rule.keywords.some(keyword => text.includes(keyword.toLowerCase())));
+      return match ? match.section : "custom";
+    }
+    function saveItems(options = {}) {
+      safeLocalSet(storageKey, JSON.stringify(items));
+      queueCloudSave(options);
+    }
+    function getJbConfig() {
+      const masterKey = safeLocalGet(jbKeyStorage) || "";
+      const binId = safeLocalGet(jbBinStorage) || "";
+      return { masterKey, binId };
+    }
+    function canUseCloudSync() {
+      const { masterKey, binId } = getJbConfig();
+      return !!(masterKey && binId);
+    }
+    function setCloudStatus(message) {
+      document.getElementById("cloudStatus").textContent = message;
+    }
+    async function loadCloudItems(options = {}) {
+      const { masterKey, binId } = getJbConfig();
+      if (!masterKey || !binId) {
+        setCloudStatus("尚未設定 JSONBin。請展開「⚙️ 雲端設定」貼上 Master Key 與 Bin ID。");
+        return;
+      }
+      try {
+        const response = await fetch(`${jbApiBase}/${binId}/latest`, {
+          method: "GET",
+          cache: "no-store",
+          headers: {
+            "X-Master-Key": masterKey,
+            "X-Bin-Meta": "false"
+          }
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        // 兼容兩種回傳結構：直接 {items} 或 {record:{items}}
+        const record = data.record || data;
+        if (Array.isArray(record.items) && record.items.length > 0) {
+          items = migrateItems(record.items);
+          safeLocalSet(storageKey, JSON.stringify(items));
+          renderCards();
+          lastCloudSyncAt = Date.now();
+          setCloudStatus(`${options.manual ? "已手動同步" : "已載入雲端資料"}：共 ${items.length} 張卡片。`);
+          return;
+        }
+        // 雲端是空的，把本機現有資料推上去當初始
+        await saveItemsToCloud("已初始化雲端，未來新增會自動同步。");
+      } catch (error) {
+        setCloudStatus(`雲端同步失敗：${error.message || "無法連線"}。請確認 Master Key 與 Bin ID 是否正確。`);
+      }
+    }
+    function queueCloudSave(options = {}) {
+      if (!canUseCloudSync()) return;
+      window.clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = window.setTimeout(() => {
+        saveItemsToCloud("已同步到雲端，其他裝置重新整理後會看到更新。", options);
+      }, 800);
+    }
+    async function saveItemsToCloud(message, options = {}) {
+      const { masterKey, binId } = getJbConfig();
+      if (!masterKey || !binId) return;
+      try {
+        const response = await fetch(`${jbApiBase}/${binId}`, {
+          method: "PUT",
+          cache: "no-store",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Master-Key": masterKey,
+            "X-Bin-Versioning": "false"
+          },
+          body: JSON.stringify({ items })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        lastCloudSyncAt = Date.now();
+        setCloudStatus(`${message || "已同步到雲端。"} 雲端目前共 ${items.length} 張卡片。`);
+      } catch (error) {
+        setCloudStatus(`雲端儲存失敗：${error.message || "無法連線"}。資料已暫存本機，下次同步會重試。`);
+      }
+    }
+
+    async function testCloudConnection() {
+      const { masterKey, binId } = getJbConfig();
+      if (!masterKey || !binId) {
+        setCloudStatus("尚未設定 JSONBin。請展開「⚙️ 雲端設定」貼上 Master Key 與 Bin ID。");
+        return;
+      }
+      setCloudStatus("正在測試雲端連線...");
+      try {
+        const response = await fetch(`${jbApiBase}/${binId}/latest`, {
+          cache: "no-store",
+          headers: { "X-Master-Key": masterKey, "X-Bin-Meta": "false" }
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const record = data.record || data;
+        const count = Array.isArray(record.items) ? record.items.length : 0;
+        setCloudStatus(`✅ 雲端連線正常：目前雲端共有 ${count} 張卡片。`);
+      } catch (error) {
+        setCloudStatus(`❌ 雲端連線失敗：${error.message || "無法連線"}。請確認 Master Key 與 Bin ID 是否正確。`);
+      }
+    }
+
+    async function createNewBin() {
+      const masterKey = (document.getElementById("jbMasterKey").value || "").trim();
+      if (!masterKey) {
+        setCloudStatus("請先貼上 Master Key 再建立 Bin。");
+        return;
+      }
+      setCloudStatus("正在建立新的雲端 Bin...");
+      try {
+        const response = await fetch(jbApiBase, {
+          method: "POST",
+          cache: "no-store",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Master-Key": masterKey,
+            "X-Bin-Versioning": "false",
+            "X-Bin-Private": "true",
+            "X-Bin-Name": "news-vocab-panel"
+          },
+          body: JSON.stringify({ items })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const binId = (data.metadata && data.metadata.id) || data.id;
+        if (!binId) throw new Error("回傳沒有 Bin ID");
+        safeLocalSet(jbKeyStorage, masterKey);
+        safeLocalSet(jbBinStorage, binId);
+        document.getElementById("jbBinId").value = binId;
+        setCloudStatus(`✅ 已建立新的 Bin（ID: ${binId}）。設定完成，已將目前 ${items.length} 張卡片上傳。`);
+      } catch (error) {
+        setCloudStatus(`❌ 建立 Bin 失敗：${error.message || "無法連線"}。請確認 Master Key 正確。`);
+      }
+    }
+
+    function saveJsonBinSettings() {
+      const masterKey = (document.getElementById("jbMasterKey").value || "").trim();
+      const binId = (document.getElementById("jbBinId").value || "").trim();
+      if (!masterKey || !binId) {
+        setCloudStatus("請同時填寫 Master Key 與 Bin ID 再儲存。");
+        return;
+      }
+      safeLocalSet(jbKeyStorage, masterKey);
+      safeLocalSet(jbBinStorage, binId);
+      setCloudStatus("✅ 設定已儲存。正在從雲端載入資料...");
+      loadCloudItems({ manual: true });
+    }
+
+    function fillJsonBinSettings() {
+      const { masterKey, binId } = getJbConfig();
+      if (masterKey) document.getElementById("jbMasterKey").value = masterKey;
+      if (binId) document.getElementById("jbBinId").value = binId;
+      if (masterKey && binId) {
+        setCloudStatus(`已載入儲存的設定（Bin: ${binId.slice(0, 8)}...）。正在同步...`);
+      } else {
+        setCloudStatus("尚未設定 JSONBin。請展開「⚙️ 雲端設定」依教學貼上資料。");
+      }
+    }
+
+    function syncFromCloud() {
+      setCloudStatus("正在同步雲端資料...");
+      loadCloudItems({ manual: true });
+    }
+
+    function autoRefreshCloud() {
+      if (!canUseCloudSync() || document.hidden) return;
+      if (Date.now() - lastCloudSyncAt < 30000) return;
+      loadCloudItems({ manual: false });
+    }
+
+    function renderCards() {
+      renderStats();
+      const root = document.getElementById("cardRoot");
+      root.innerHTML = "";
+      const allGroups = getRenderedGroups(items);
+      renderCategoryIndex(allGroups);
+      updateViewButtons();
+      const visibleGroups = getVisibleGroups(allGroups);
+      if (visibleGroups.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        if (searchQuery) {
+          empty.textContent = `找不到符合「${searchQuery}」的卡片，試試別的關鍵字。`;
+        } else if (statusFilter !== "all") {
+          empty.textContent = "目前的篩選條件下沒有卡片。";
+        } else {
+          empty.textContent = currentView === "today"
+            ? "今天還沒有新增內容。新增或批次匯入後，會先顯示在這裡。"
+            : "這個分類目前沒有卡片。";
+        }
+        root.appendChild(empty);
+        return;
+      }
+      visibleGroups.forEach(group => {
+        const title = document.createElement("div");
+        title.id = group.id;
+        title.className = `section-title ${group.className}`;
+        title.textContent = group.title;
+        root.appendChild(title);
+        group.items.forEach(item => root.appendChild(createCard(item)));
+      });
+    }
+    function renderStats() {
+      const today = getTodayDateKey();
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 6);
+      const weekKey = getDateKey(weekAgo);
+      let todayCount = 0, weekCount = 0, memCount = 0, revCount = 0;
+      items.forEach(item => {
+        const key = getDateKey(item.createdAt);
+        if (key === today) todayCount++;
+        if (key && key >= weekKey) weekCount++;
+        if (item.status === "memorized") memCount++;
+        else if (item.status === "review") revCount++;
+      });
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      set("statToday", todayCount);
+      set("statWeek", weekCount);
+      set("statMem", memCount);
+      set("statRev", revCount);
+    }
+    function matchesSearch(item) {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return [item.vocab, item.definition, item.exampleEn, item.exampleZh]
+        .filter(Boolean)
+        .some(text => String(text).toLowerCase().includes(q));
+    }
+    function matchesStatus(item) {
+      if (statusFilter === "all") return true;
+      const s = item.status || "new";
+      return s === statusFilter;
+    }
+    function getVisibleGroups(allGroups) {
+      let groups = allGroups.map(group => ({
+        ...group,
+        items: group.items.filter(item => matchesSearch(item) && matchesStatus(item))
+      })).filter(group => group.items.length > 0);
+      if (currentView === "today") {
+        const today = getTodayDateKey();
+        groups = groups.map(group => ({
+          ...group,
+          items: group.items.filter(item => getDateKey(item.createdAt) === today)
+        })).filter(group => group.items.length > 0);
+      } else if (currentView === "category" && activeCategoryId) {
+        groups = groups.filter(group => group.id === activeCategoryId);
+      }
+      return groups;
+    }
+    function getRenderedGroups(sourceItems) {
+      const groups = [];
+      const dynamicGroups = new Map();
+      sourceItems.filter(item => item.groupTitle).forEach(item => {
+        if (!dynamicGroups.has(item.groupTitle)) dynamicGroups.set(item.groupTitle, []);
+        dynamicGroups.get(item.groupTitle).push(item);
+      });
+      dynamicGroups.forEach((groupItems, groupTitle) => {
+        groups.push({ id: `category-${slugify(groupTitle)}`, title: `📚 ${groupTitle}`, className: "title-custom", items: sortByDate(groupItems) });
+      });
+      Object.entries(sections).forEach(([key, meta]) => {
+        const groupItems = sourceItems.filter(item => item.section === key && !item.groupTitle);
+        if (groupItems.length) groups.push({ id: `category-${key}`, title: meta.title, className: meta.className, items: sortByDate(groupItems) });
+      });
+      return groups;
+    }
+    function renderCategoryIndex(groups) {
+      const index = document.getElementById("categoryIndex");
+      index.innerHTML = "";
+      const todayLink = makeIndexLink("今日新增", groups.reduce((sum, group) => sum + group.items.filter(item => getDateKey(item.createdAt) === getTodayDateKey()).length, 0), "today");
+      index.appendChild(todayLink);
+      groups.forEach(group => {
+        index.appendChild(makeIndexLink(stripLeadingDecorations(group.title), group.items.length, "category", group.id));
+      });
+    }
+    function makeIndexLink(label, count, view, id = null) {
+      const link = document.createElement("a");
+      link.className = "category-link";
+      if ((view === "today" && currentView === "today") || (view === "category" && activeCategoryId === id)) link.classList.add("active");
+      link.href = "#cardRoot";
+      bindTap(link, event => {
+        event.preventDefault();
+        currentView = view;
+        activeCategoryId = id;
+        renderCards();
+        document.getElementById("cardRoot").scrollIntoView({ behavior: "smooth" });
+      });
+      const name = document.createElement("span");
+      name.textContent = label;
+      const badge = document.createElement("span");
+      badge.className = "category-count";
+      badge.textContent = count;
+      link.appendChild(name);
+      link.appendChild(badge);
+      return link;
+    }
+    function createCard(item) {
+      const card = document.createElement("article");
+      card.className = "card";
+      const status = item.status || "new";
+      const statusPillHtml = status === "memorized"
+        ? '<span class="status-pill memorized">✓ 已記住</span>'
+        : status === "review"
+          ? '<span class="status-pill review">↻ 待複習</span>'
+          : '';
+      const imageHtml = item.imageUrl
+        ? `<img class="card-image" loading="lazy" alt="" src="${escapeAttr(item.imageUrl)}">`
+        : '';
+      const sourceHtml = item.sourceUrl
+        ? `<a class="card-source" href="${escapeAttr(item.sourceUrl)}" target="_blank" rel="noopener">🔗 ${formatSourceLabel(item.sourceUrl)}</a>`
+        : '';
+      card.innerHTML = `
+        <div class="word-header">
+          <span class="vocab"></span>
+          <div class="card-actions">
+            <button class="play-btn" type="button" aria-label="播放單字">🔊</button>
+            <button class="delete-btn" type="button" aria-label="刪除卡片">×</button>
+          </div>
+        </div>
+        <div class="card-date"></div>
+        <div class="definition"></div>
+        ${imageHtml}
+        <div class="example-block">
+          <div class="example-en"></div>
+          <div class="example-zh"></div>
+          <button class="play-sentence-btn" type="button" aria-label="播放例句">🔊</button>
+        </div>
+        ${sourceHtml}
+        <div class="card-mark-row">
+          <button class="mark-btn memorized ${status === "memorized" ? "active" : ""}" type="button" data-status="memorized">✓ 我已記住</button>
+          <button class="mark-btn review ${status === "review" ? "active" : ""}" type="button" data-status="review">↻ 還要複習</button>
+        </div>`;
+      const vocabSpan = card.querySelector(".vocab");
+      vocabSpan.textContent = item.vocab;
+      if (statusPillHtml) vocabSpan.insertAdjacentHTML("afterend", statusPillHtml);
+      card.querySelector(".card-date").textContent = `新增日期：${formatDateLabel(item.createdAt)}`;
+      card.querySelector(".definition").textContent = item.definition;
+      card.querySelector(".example-en").textContent = item.exampleEn;
+      card.querySelector(".example-zh").textContent = item.exampleZh;
+      card.querySelector(".play-btn").addEventListener("click", () => speak(item.vocab));
+      card.querySelector(".play-sentence-btn").addEventListener("click", () => speak(item.exampleEn));
+      card.querySelector(".delete-btn").addEventListener("click", () => deleteItem(item.id));
+      card.querySelectorAll(".mark-btn").forEach(btn => {
+        btn.addEventListener("click", () => toggleItemStatus(item.id, btn.dataset.status));
+      });
+      return card;
+    }
+    function escapeAttr(value) {
+      return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+    function formatSourceLabel(url) {
+      try {
+        const u = new URL(url);
+        return u.hostname.replace(/^www\./, "");
+      } catch {
+        return "來源連結";
+      }
+    }
+    function toggleItemStatus(id, nextStatus) {
+      items = items.map(item => {
+        if (item.id !== id) return item;
+        const current = item.status || "new";
+        return { ...item, status: current === nextStatus ? "new" : nextStatus };
+      });
+      saveItems({ replace: true });
+      renderCards();
+    }
+    function addItem(item) {
+      items.unshift({
+        id: window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : String(Date.now()),
+        createdAt: getTodayDateKey(),
+        status: "new",
+        imageUrl: "",
+        sourceUrl: "",
+        ...item
+      });
+      currentView = "today";
+      activeCategoryId = null;
+      saveItems();
+      renderCards();
+      setStatus("已加入新的學習卡片，並記錄今天日期。");
+      setCloudStatus("已新增到本機，正在同步到雲端...");
+    }
+    function deleteItem(id) {
+      if (!confirm("確定要刪除這張卡片嗎？")) return;
+      items = items.filter(item => item.id !== id);
+      saveItems({ replace: true });
+      renderCards();
+      setStatus("已刪除卡片。");
+    }
+    function importBulkText() {
+      try {
+        setBulkStatus("正在匯入...");
+        const rawText = document.getElementById("bulkInput").value.trim();
+        if (!rawText) {
+          setBulkStatus("請先貼上要批次匯入的內容。");
+          return;
+        }
+        const parsedItems = parseBulkText(rawText);
+        if (!parsedItems.length) {
+          setBulkStatus("沒有辨識到可匯入的詞條，請確認每個詞條有英文標題與解釋。");
+          return;
+        }
+        const today = getTodayDateKey();
+        const newItems = parsedItems.map((item, index) => ({ id: `${Date.now()}-${index}`, section: "custom", createdAt: today, ...item }));
+        items = [...newItems, ...items];
+        currentView = "today";
+        activeCategoryId = null;
+        saveItems();
+        renderCards();
+        document.getElementById("bulkInput").value = "";
+        setBulkStatus(`已批次匯入 ${newItems.length} 張卡片，並記錄今天日期。`);
+        setCloudStatus("已新增到本機，正在同步到雲端...");
+        document.getElementById("cardRoot").scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (error) {
+        setBulkStatus("匯入時發生錯誤，請稍後再試或改用手動新增。");
+      }
+    }
+    function parseBulkText(rawText) {
+      const lines = rawText.replace(/\r/g, "").split("\n").map(line => line.trim()).filter(Boolean);
+      const parsed = [];
+      let currentGroup = "批次匯入";
+      let currentItem = null;
+      function flush() {
+        if (!currentItem || !currentItem.vocab) return;
+        const parts = [];
+        if (currentItem.translation) parts.push(`中文：${currentItem.translation}`);
+        if (currentItem.timecode) parts.push(`時間：${currentItem.timecode}`);
+        if (currentItem.notes.length) parts.push(currentItem.notes.join("\n"));
+        const definition = parts.join("\n") || "請補上中文解釋。";
+        parsed.push({
+          groupTitle: currentItem.groupTitle,
+          vocab: currentItem.vocab,
+          definition,
+          exampleEn: currentItem.exampleEn || currentItem.vocab,
+          exampleZh: currentItem.exampleZh || definition
+        });
+      }
+      lines.forEach(line => {
+        const groupMatch = line.match(/^([一二三四五六七八九十\d]+)[、.．]\s*(.+)$/);
+        if (groupMatch) { flush(); currentItem = null; currentGroup = groupMatch[2].trim(); return; }
+        const noteMatch = line.match(/^(解釋|意思)[:：]\s*(.+)$/);
+        if (noteMatch && currentItem) { currentItem.notes.push(`${noteMatch[1]}：${noteMatch[2].trim()}`); return; }
+        const exampleMatch = line.match(/^例句[:：]\s*(.+)$/);
+        if (exampleMatch && currentItem) { currentItem.exampleEn = exampleMatch[1].trim(); return; }
+        const zhMatch = line.match(/^(中文|翻譯|句意)[:：]\s*(.+)$/);
+        if (zhMatch && currentItem) { currentItem.exampleZh = zhMatch[2].trim(); return; }
+        if (looksLikeTermHeader(line)) {
+          flush();
+          currentItem = { groupTitle: currentGroup, ...parseTermHeader(line), notes: [], exampleEn: "", exampleZh: "" };
+          return;
+        }
+        if (currentItem) currentItem.notes.push(line);
+      });
+      flush();
+      return parsed;
+    }
+    function looksLikeTermHeader(line) {
+      return /^[A-Za-z0-9'"]/.test(line) && !/[。！？.!?]$/.test(line);
+    }
+    function parseTermHeader(line) {
+      const timeMatch = line.match(/\[([^\]]+)\]\s*$/);
+      const timecode = timeMatch ? timeMatch[1].trim() : "";
+      const withoutTime = line.replace(/\s*\[[^\]]+\]\s*$/g, "").trim();
+      const translationMatch = withoutTime.match(/^(.*)\(([^()]*)\)\s*$/);
+      if (translationMatch && /[\u3400-\u9fff]/.test(translationMatch[2])) {
+        return { vocab: translationMatch[1].trim(), translation: translationMatch[2].trim(), timecode };
+      }
+      return { vocab: withoutTime, translation: "", timecode };
+    }
+    async function recognizeSentence() {
+      const sentence = document.getElementById("aiInput").value.trim();
+      if (!sentence) { setStatus("請先貼上英文句子。"); return; }
+      const endpoint = document.getElementById("aiEndpoint").value.trim();
+      if (endpoint) {
+        safeLocalSet(endpointStorageKey, endpoint);
+        setStatus("正在送出給 AI 服務辨識...");
+        try {
+          const detected = await callAiEndpoint(endpoint, sentence);
+          fillForm(detected);
+          setStatus("AI 辨識完成，已填入表單。確認內容後按「加入學習卡片」。");
+          return;
+        } catch {
+          setStatus("AI 服務暫時無法使用，已改用本機規則先填入。");
+        }
+      }
+      fillForm(detectPhrase(sentence));
+      setStatus("已先用本機規則辨識並填入。");
+    }
+    async function callAiEndpoint(endpoint, sentence) {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sentence })
+      });
+      if (!response.ok) throw new Error("AI endpoint error");
+      const data = await response.json();
+      return {
+        section: data.section || "custom",
+        vocab: data.vocab || sentence.split(/\s+/).slice(0, 4).join(" "),
+        definition: data.definition || "AI 待補：請確認這個片語的中文解釋。",
+        exampleEn: data.exampleEn || sentence,
+        exampleZh: data.exampleZh || "AI 待補：請在這裡填入中文翻譯。"
+      };
+    }
+    function fillForm(detected) {
+      document.getElementById("section").value = sections[detected.section] ? detected.section : "custom";
+      document.getElementById("vocab").value = detected.vocab;
+      document.getElementById("definition").value = detected.definition;
+      document.getElementById("exampleEn").value = detected.exampleEn;
+      document.getElementById("exampleZh").value = detected.exampleZh;
+    }
+    function detectPhrase(sentence) {
+      const lower = sentence.toLowerCase();
+      const phraseMap = [
+        { test: "pricing", vocab: "Pricing out", definition: "用高價把某人擠出市場：價格過高使原本的群體無法負擔。" },
+        { test: "rental crisis", vocab: "Rental Crisis", definition: "租屋危機：形容長租房源不足、租金快速上漲的困境。" },
+        { test: "roof over", vocab: "Put a roof over one's head", definition: "有個容身之處：擁有可以安全居住的地方。" },
+        { test: "upfront investment", vocab: "Upfront Investment", definition: "前期投入資金 / 初始購買成本：一開始需要支付的費用。" },
+        { test: "swap your shop", vocab: "Swap Your Shop", definition: "改變消費習慣：把部分日常購買改成在地產品。" },
+        { test: "wheels", vocab: "Keeps the wheels turning", definition: "維持運轉 / 保持繁榮：讓經濟或系統持續運作。" }
+      ];
+      const match = phraseMap.find(item => lower.includes(item.test));
+      const fallback = sentence.replace(/[.,!?;:]+$/g, "").split(/\s+/).slice(0, 4).join(" ");
+      return { section: match ? classifyItem(match) : "custom", vocab: match ? match.vocab : fallback, definition: match ? match.definition : "AI 待補：請確認這個片語的中文解釋。", exampleEn: sentence, exampleZh: "AI 待補：請在這裡填入中文翻譯。" };
+    }
+    function clearForm() {
+      document.getElementById("aiInput").value = "";
+      document.getElementById("addForm").reset();
+      setStatus("");
+    }
+    function resetToDefault() {
+      if (!confirm("確定要還原預設內容嗎？這會清除你在這個瀏覽器新增的卡片。")) return;
+      items = migrateItems([...defaultItems]);
+      saveItems({ replace: true });
+      currentView = "all";
+      activeCategoryId = null;
+      renderCards();
+      clearForm();
+      setStatus("已還原預設內容。");
+    }
+    function showTodayView() {
+      currentView = "today";
+      activeCategoryId = null;
+      renderCards();
+    }
+    function showAllView() {
+      currentView = "all";
+      activeCategoryId = null;
+      renderCards();
+    }
+    function updateViewButtons() {
+      document.getElementById("todayViewBtn").classList.toggle("active", currentView === "today");
+      document.getElementById("allViewBtn").classList.toggle("active", currentView === "all");
+    }
+    function setStatus(message) {
+      document.getElementById("status").textContent = message;
+    }
+    function setBulkStatus(message) {
+      document.getElementById("bulkStatus").textContent = message;
+    }
+    function selectAccent(accent) {
+      selectedAccent = accent;
+      safeLocalSet(accentStorageKey, accent);
+      updateAccentButtons();
+      setStatus(`已切換成${getAccentName(accent)}發音。`);
+    }
+    function updateAccentButtons() {
+      document.querySelectorAll(".accent-btn").forEach(button => {
+        const active = button.dataset.accent === selectedAccent;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    }
+    function getAccentName(accent) {
+      return { "en-AU": "澳洲", "en-GB": "英式", "en-US": "美式" }[accent] || "英文";
+    }
+    function findVoiceForAccent(voices) {
+      const preferred = accentFallbacks[selectedAccent] || accentFallbacks["en-AU"];
+      for (const lang of preferred) {
+        const voice = voices.find(item => item.lang === lang) || voices.find(item => item.lang.toLowerCase().startsWith(lang.toLowerCase()));
+        if (voice) return voice;
+      }
+      return voices.find(item => item.lang.toLowerCase().startsWith("en"));
+    }
+    function speak(text) {
+      if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") {
+        setStatus("這個瀏覽器目前不支援語音播放。");
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voice = findVoiceForAccent(window.speechSynthesis.getVoices());
+      if (voice) {
+        utterance.voice = voice;
+        utterance.lang = voice.lang;
+      } else {
+        utterance.lang = selectedAccent;
+      }
+      utterance.rate = .9;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    }
+    function getTodayDateKey() {
+      return getDateKey(new Date());
+    }
+    function getDateKey(value) {
+      if (!value || value === "未記錄") return "";
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+    function formatDateLabel(value) {
+      return getDateKey(value) || "未記錄";
+    }
+    function sortByDate(list) {
+      return [...list].sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+    }
+    function slugify(text) {
+      return String(text).toLowerCase().replace(/[^\w\u3400-\u9fff]+/g, "-").replace(/^-+|-+$/g, "") || "custom";
+    }
+    function stripLeadingDecorations(text) {
+      return String(text).replace(/^[^\w\u3400-\u9fff]+/, "");
+    }
+    function bindTap(element, handler) {
+      if (!element) return;
+      let lastTouch = 0;
+      element.addEventListener("touchend", event => {
+        lastTouch = Date.now();
+        event.preventDefault();
+        handler(event);
+      }, { passive: false });
+      element.addEventListener("click", event => {
+        if (Date.now() - lastTouch < 700) return;
+        handler(event);
+      });
+    }
+
+    // ===== 閃卡模式 =====
+    let flashcardItems = [];
+    let flashcardIndex = 0;
+    let flashcardFlipped = false;
+    function openFlashcardMode() {
+      const visible = getVisibleItems();
+      if (visible.length === 0) {
+        alert("目前沒有可複習的卡片，請先新增或調整篩選條件。");
+        return;
+      }
+      flashcardItems = shuffle([...visible]);
+      flashcardIndex = 0;
+      flashcardFlipped = false;
+      document.getElementById("flashcardModal").hidden = false;
+      renderFlashcard();
+    }
+    function renderFlashcard() {
+      const area = document.getElementById("flashcardArea");
+      if (flashcardItems.length === 0) { area.innerHTML = ""; return; }
+      const item = flashcardItems[flashcardIndex];
+      area.innerHTML = `
+        <div class="flashcard ${flashcardFlipped ? "flipped" : ""}" id="flashcardEl">
+          <div class="fc-vocab"></div>
+          <div class="fc-en"></div>
+          <div class="fc-back">
+            <div class="fc-definition"></div>
+            <div class="fc-zh"></div>
+          </div>
+          <div class="fc-hint">${flashcardFlipped ? "再點一次回到正面" : "👆 點卡片看中文解釋"}</div>
+        </div>
+        <div class="flashcard-judge">
+          <button class="judge-btn dont" type="button" data-judge="review">↻ 還要複習</button>
+          <button class="judge-btn know" type="button" data-judge="memorized">✓ 我會了</button>
+        </div>
+        <div class="flashcard-controls">
+          <div class="flashcard-progress">${flashcardIndex + 1} / ${flashcardItems.length}</div>
+          <div class="flashcard-nav">
+            <button class="view-btn" type="button" data-nav="prev">← 上一張</button>
+            <button class="view-btn" type="button" data-nav="next">下一張 →</button>
+          </div>
+        </div>
+      `;
+      area.querySelector(".fc-vocab").textContent = item.vocab;
+      area.querySelector(".fc-en").textContent = item.exampleEn || "";
+      area.querySelector(".fc-definition").textContent = item.definition || "";
+      area.querySelector(".fc-zh").textContent = item.exampleZh || "";
+      area.querySelector("#flashcardEl").addEventListener("click", () => {
+        flashcardFlipped = !flashcardFlipped;
+        renderFlashcard();
+      });
+      area.querySelectorAll("[data-nav]").forEach(btn => {
+        btn.addEventListener("click", event => {
+          event.stopPropagation();
+          if (btn.dataset.nav === "prev") {
+            flashcardIndex = (flashcardIndex - 1 + flashcardItems.length) % flashcardItems.length;
+          } else {
+            flashcardIndex = (flashcardIndex + 1) % flashcardItems.length;
+          }
+          flashcardFlipped = false;
+          renderFlashcard();
+        });
+      });
+      area.querySelectorAll("[data-judge]").forEach(btn => {
+        btn.addEventListener("click", event => {
+          event.stopPropagation();
+          const target = btn.dataset.judge;
+          const id = item.id;
+          items = items.map(it => it.id === id ? { ...it, status: target } : it);
+          saveItems({ replace: true });
+          renderCards();
+          if (flashcardIndex >= flashcardItems.length - 1) {
+            flashcardIndex = flashcardItems.length - 1;
+          } else {
+            flashcardIndex++;
+          }
+          flashcardFlipped = false;
+          renderFlashcard();
+        });
+      });
+    }
+    function closeFlashcardMode() {
+      document.getElementById("flashcardModal").hidden = true;
+    }
+
+    // ===== 測驗模式 =====
+    let quizPool = [];
+    let quizIndex = 0;
+    let quizCorrect = 0;
+    let quizTotal = 0;
+    function openQuizMode() {
+      const visible = getVisibleItems().filter(item => item.vocab && item.exampleEn);
+      if (visible.length < 2) {
+        alert("至少需要 2 張卡片才能開始測驗。");
+        return;
+      }
+      quizPool = shuffle([...visible]);
+      quizIndex = 0;
+      quizCorrect = 0;
+      quizTotal = 0;
+      document.getElementById("quizModal").hidden = false;
+      renderQuiz();
+    }
+    function renderQuiz() {
+      const area = document.getElementById("quizArea");
+      if (quizIndex >= quizPool.length) {
+        area.innerHTML = `
+          <div class="quiz-feedback correct" style="text-align:center;font-size:1.1rem">
+            測驗完成！答對 ${quizCorrect} / ${quizTotal}
+          </div>
+          <div style="display:flex;gap:10px;justify-content:center;margin-top:14px">
+            <button class="action-btn" type="button" id="quizRestartBtn">再來一次</button>
+            <button class="action-btn warning" type="button" id="quizCloseBtn">關閉</button>
+          </div>
+        `;
+        document.getElementById("quizRestartBtn").addEventListener("click", openQuizMode);
+        document.getElementById("quizCloseBtn").addEventListener("click", closeQuizMode);
+        return;
+      }
+      const item = quizPool[quizIndex];
+      const choices = buildQuizChoices(item);
+      const blanked = blankOutVocab(item.exampleEn, item.vocab);
+      area.innerHTML = `
+        <div class="quiz-stats">第 ${quizIndex + 1} / ${quizPool.length} 題 · 目前 ${quizCorrect} 分</div>
+        <div class="quiz-question"></div>
+        <div class="quiz-zh-hint"></div>
+        <div class="quiz-choices"></div>
+        <div class="quiz-feedback" id="quizFeedback" hidden></div>
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button class="action-btn secondary" type="button" id="quizNextBtn" hidden>下一題 →</button>
+        </div>
+      `;
+      area.querySelector(".quiz-question").innerHTML = blanked;
+      area.querySelector(".quiz-zh-hint").textContent = item.exampleZh ? `中文提示：${item.exampleZh}` : "";
+      const choicesEl = area.querySelector(".quiz-choices");
+      choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.className = "quiz-choice";
+        btn.type = "button";
+        btn.textContent = choice;
+        btn.addEventListener("click", () => answerQuiz(btn, choice, item.vocab));
+        choicesEl.appendChild(btn);
+      });
+      document.getElementById("quizNextBtn").addEventListener("click", () => {
+        quizIndex++;
+        renderQuiz();
+      });
+    }
+    function answerQuiz(btn, choice, correct) {
+      const isCorrect = choice.toLowerCase() === correct.toLowerCase();
+      quizTotal++;
+      if (isCorrect) quizCorrect++;
+      document.querySelectorAll(".quiz-choice").forEach(b => {
+        b.disabled = true;
+        if (b.textContent.toLowerCase() === correct.toLowerCase()) b.classList.add("correct");
+        else if (b === btn) b.classList.add("wrong");
+      });
+      const fb = document.getElementById("quizFeedback");
+      fb.hidden = false;
+      fb.classList.add(isCorrect ? "correct" : "wrong");
+      fb.textContent = isCorrect ? "✓ 答對了！" : `✗ 正確答案是：${correct}`;
+      document.getElementById("quizNextBtn").hidden = false;
+    }
+    function buildQuizChoices(item) {
+      const distractors = items
+        .filter(other => other.id !== item.id && other.vocab && other.vocab.toLowerCase() !== item.vocab.toLowerCase())
+        .map(other => other.vocab);
+      const unique = [...new Set(distractors)];
+      const picked = shuffle(unique).slice(0, 3);
+      return shuffle([item.vocab, ...picked]);
+    }
+    function blankOutVocab(sentence, vocab) {
+      if (!sentence) return "";
+      const safeSentence = escapeAttr(sentence);
+      const safeVocab = vocab.trim();
+      if (!safeVocab) return safeSentence;
+      try {
+        const escaped = safeVocab.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const re = new RegExp(escaped, "i");
+        if (re.test(sentence)) {
+          return escapeAttr(sentence).replace(re, `<span class="quiz-blank">＿＿＿</span>`);
+        }
+      } catch {}
+      return `${safeSentence} <span class="quiz-blank">＿＿＿</span>`;
+    }
+    function closeQuizMode() {
+      document.getElementById("quizModal").hidden = true;
+    }
+
+    // ===== 通用：取得目前可見的卡片（給閃卡 / 測驗用） =====
+    function getVisibleItems() {
+      const allGroups = getRenderedGroups(items);
+      const visible = getVisibleGroups(allGroups);
+      return visible.flatMap(group => group.items);
+    }
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // ===== 搜尋與篩選 =====
+    function updateFilterChips() {
+      document.querySelectorAll(".filter-chip").forEach(chip => {
+        chip.classList.toggle("active", chip.dataset.status === statusFilter);
+      });
+    }
+
+    document.getElementById("addForm").addEventListener("submit", event => {
+      event.preventDefault();
+      addItem({
+        section: document.getElementById("section").value,
+        vocab: document.getElementById("vocab").value.trim(),
+        definition: document.getElementById("definition").value.trim(),
+        exampleEn: document.getElementById("exampleEn").value.trim(),
+        exampleZh: document.getElementById("exampleZh").value.trim(),
+        imageUrl: document.getElementById("imageUrl").value.trim(),
+        sourceUrl: document.getElementById("sourceUrl").value.trim()
+      });
+      event.target.reset();
+      document.getElementById("aiInput").value = "";
+    });
+    document.querySelectorAll(".accent-btn").forEach(button => {
+      bindTap(button, () => selectAccent(button.dataset.accent));
+    });
+    bindTap(document.getElementById("syncBtn"), syncFromCloud);
+    bindTap(document.getElementById("cloudTestBtn"), testCloudConnection);
+    bindTap(document.getElementById("jbSaveBtn"), saveJsonBinSettings);
+    bindTap(document.getElementById("jbCreateBinBtn"), createNewBin);
+    bindTap(document.getElementById("jbHelpBtn"), () => {
+      document.getElementById("helpModal").hidden = false;
+    });
+    bindTap(document.getElementById("recognizeBtn"), recognizeSentence);
+    bindTap(document.getElementById("clearFormBtn"), clearForm);
+    bindTap(document.getElementById("bulkImportBtn"), importBulkText);
+    bindTap(document.getElementById("bulkClearBtn"), () => {
+      document.getElementById("bulkInput").value = "";
+      setBulkStatus("");
+    });
+    bindTap(document.getElementById("resetBtn"), resetToDefault);
+    bindTap(document.getElementById("todayViewBtn"), showTodayView);
+    bindTap(document.getElementById("allViewBtn"), showAllView);
+
+    // 搜尋
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+      searchInput.addEventListener("input", event => {
+        searchQuery = event.target.value.trim();
+        renderCards();
+      });
+    }
+    bindTap(document.getElementById("searchClearBtn"), () => {
+      searchQuery = "";
+      if (searchInput) searchInput.value = "";
+      renderCards();
+    });
+    // 狀態篩選
+    document.querySelectorAll(".filter-chip").forEach(chip => {
+      bindTap(chip, () => {
+        statusFilter = chip.dataset.status || "all";
+        updateFilterChips();
+        renderCards();
+      });
+    });
+    // 學習模式
+    bindTap(document.getElementById("flashcardBtn"), openFlashcardMode);
+    bindTap(document.getElementById("quizBtn"), openQuizMode);
+    document.querySelectorAll("[data-close]").forEach(btn => {
+      bindTap(btn, () => {
+        if (btn.dataset.close === "flashcard") closeFlashcardMode();
+        else if (btn.dataset.close === "quiz") closeQuizMode();
+        else if (btn.dataset.close === "help") document.getElementById("helpModal").hidden = true;
+      });
+    });
+    // 點 backdrop 關閉
+    ["flashcardModal", "quizModal", "helpModal"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("click", event => {
+        if (event.target === el) el.hidden = true;
+      });
+    });
+    // FAB：捲到新增表單並聚焦
+    bindTap(document.getElementById("fabBtn"), () => {
+      const target = document.getElementById("aiInput");
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => target.focus(), 350);
+      }
+    });
+    // 鍵盤快捷：Esc 關閉 modal、←/→ 切換閃卡
+    document.addEventListener("keydown", event => {
+      const fcOpen = !document.getElementById("flashcardModal").hidden;
+      const quizOpen = !document.getElementById("quizModal").hidden;
+      if (event.key === "Escape") {
+        if (fcOpen) closeFlashcardMode();
+        if (quizOpen) closeQuizMode();
+      }
+      if (fcOpen && flashcardItems.length > 0) {
+        if (event.key === "ArrowLeft") {
+          flashcardIndex = (flashcardIndex - 1 + flashcardItems.length) % flashcardItems.length;
+          flashcardFlipped = false; renderFlashcard();
+        }
+        if (event.key === "ArrowRight") {
+          flashcardIndex = (flashcardIndex + 1) % flashcardItems.length;
+          flashcardFlipped = false; renderFlashcard();
+        }
+        if (event.key === " ") { event.preventDefault(); flashcardFlipped = !flashcardFlipped; renderFlashcard(); }
+      }
+    });
+    updateFilterChips();
+    document.getElementById("aiEndpoint").value = safeLocalGet(endpointStorageKey) || "";
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.onvoiceschanged = updateAccentButtons;
+    }
+    updateAccentButtons();
+    fillJsonBinSettings();
+    renderCards();
+    loadCloudItems();
+    // 改成只在「視窗 focus」與「分頁切回前景」時同步，避免吃光 JSONBin 免費額度
+    window.addEventListener("focus", autoRefreshCloud);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) autoRefreshCloud();
+    });
+  </script>
+</body>
+</html>
